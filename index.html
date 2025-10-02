@@ -824,9 +824,20 @@
             
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
+            submitBtn.textContent = 'Verifying...';
             
             try {
+                // Execute reCAPTCHA v3
+                const recaptchaToken = await new Promise((resolve, reject) => {
+                    grecaptcha.ready(() => {
+                        grecaptcha.execute('6LfbytArAAAAAJIYUKrkRgRAOlGzCktmqB-WoYrV', {action: 'submit_application'})
+                            .then(resolve)
+                            .catch(reject);
+                    });
+                });
+                
+                submitBtn.textContent = 'Submitting...';
+                
                 const formData = new FormData();
                 formData.append('firstName', document.getElementById('firstName').value);
                 formData.append('lastName', document.getElementById('lastName').value);
@@ -843,6 +854,8 @@
                 formData.append('jobReferenceId', document.getElementById('jobReferenceId').value);
                 formData.append('company', document.getElementById('company').value);
                 formData.append('jobUrl', document.getElementById('jobUrl').value);
+                // Add reCAPTCHA token
+                formData.append('recaptcha_token', recaptchaToken);
                 
                 const cvFile = document.getElementById('cvUpload').files[0];
                 if (cvFile) {
